@@ -62,6 +62,11 @@ app.get("/u/:shortURL", (req, res) => {
   }
 });
 
+app.post("/login", (req, res) => {
+  res.cookie("username", req.body.username);
+  res.redirect("/urls");
+});
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
