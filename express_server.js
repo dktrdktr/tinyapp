@@ -47,6 +47,11 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   res.redirect("/urls");
 });
 
+app.post("/urls/:shortURL/", (req, res) => {
+  urlDatabase[req.params.shortURL] = req.body.newURL;
+  res.redirect("/urls");
+});
+
 app.get("/u/:shortURL", (req, res) => {
   if (Object.keys(urlDatabase).includes(req.params.shortURL)) {
     res.redirect(urlDatabase[req.params.shortURL]);
