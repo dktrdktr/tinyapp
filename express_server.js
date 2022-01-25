@@ -43,7 +43,11 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.get("/u/:shortURL", (req, res) => {
-  res.redirect(urlDatabase[req.params.shortURL]);
+  if (Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    res.redirect(urlDatabase[req.params.shortURL]);
+  } else {
+    res.render("404");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
