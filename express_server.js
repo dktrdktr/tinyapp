@@ -14,9 +14,6 @@ function generateRandomString() {
   const rndString = Math.random().toString(36).slice(2, 8);
   return rndString;
 }
-for (let i = 0; i < 10; i++) {
-  console.log(generateRandomString());
-}
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -28,8 +25,9 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const rndShortUrl = generateRandomString();
+  urlDatabase[rndShortUrl] = req.body["longURL"];
+  res.redirect(`/urls/:${rndShortUrl}`);
 });
 
 app.get("/urls/new", (req, res) => {
