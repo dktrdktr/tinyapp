@@ -7,12 +7,28 @@ app.set("view engine", "ejs");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 
+// const urlDatabase = {
+//   b2xVn2: "http://www.lighthouselabs.ca",
+//   "9sm5xK": "http://www.google.com",
+// };
+
 const urlDatabase = {
-  b2xVn2: "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com",
+  b6UTxQ: {
+    longURL: "https://www.tsn.ca",
+    userID: "aJ48lW",
+  },
+  i3BoGr: {
+    longURL: "https://www.google.ca",
+    userID: "aJ48lW",
+  },
 };
 
 const users = {
+  testUser: {
+    id: "testUser",
+    email: "test@test.lt",
+    password: "test",
+  },
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
@@ -42,7 +58,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  console.log(users);
+  console.log(users, urlDatabase);
   const templateVars = {
     urls: urlDatabase,
     user: users[req.cookies["user_id"]],
@@ -55,8 +71,12 @@ app.post("/urls", (req, res) => {
     res.status(400).send("Only a logged in user can do this");
   } else {
     const rndShortUrl = generateRandomString();
-    urlDatabase[rndShortUrl] = req.body["longURL"];
-    res.redirect(`/urls/:${rndShortUrl}`);
+    urlDatabase[rndShortUrl] = {
+      longURL: req.body["longURL"],
+      userID: req.cookies["user_id"],
+    };
+    console.log("created new entry in urlDatabase", urlDatabase);
+    res.redirect(`/urls/${rndShortUrl}`);
   }
 });
 
@@ -74,7 +94,7 @@ app.get("/urls/new", (req, res) => {
 app.get("/urls/:shortURL", (req, res) => {
   const templateVars = {
     shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL],
+    longURL: urlDatabase[req.params.shortURL]["longURL"],
     user: users[req.cookies["user_id"]],
   };
   res.render("urls_show", templateVars);
@@ -86,7 +106,10 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/", (req, res) => {
-  urlDatabase[req.params.shortURL] = req.body.newURL;
+  urlDatabase[req.params.shortURL] = {
+    ...urlDatabase[req.params.shortURL],
+    longURL: req.body.newURL,
+  };
   res.redirect("/urls");
 });
 
@@ -94,8 +117,15 @@ app.get("/u/:shortURL", (req, res) => {
   if (Object.keys(urlDatabase).includes(req.params.shortURL)) {
     res.redirect(urlDatabase[req.params.shortURL]);
   } else {
-    res.render("404");
+    res.redirect("/404");
   }
+});
+
+app.get("/404", (req, res) => {
+  const templateVars = {
+    user: users[req.cookies["user_id"]],
+  };
+  res.render("404", templateVars);
 });
 
 app.get("/login", (req, res) => {
