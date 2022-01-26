@@ -51,9 +51,13 @@ app.get("/urls", (req, res) => {
 });
 
 app.post("/urls", (req, res) => {
-  const rndShortUrl = generateRandomString();
-  urlDatabase[rndShortUrl] = req.body["longURL"];
-  res.redirect(`/urls/:${rndShortUrl}`);
+  if (!users[req.cookies["user_id"]]) {
+    res.status(400).send("Only a logged in user can do this");
+  } else {
+    const rndShortUrl = generateRandomString();
+    urlDatabase[rndShortUrl] = req.body["longURL"];
+    res.redirect(`/urls/:${rndShortUrl}`);
+  }
 });
 
 app.get("/urls/new", (req, res) => {
