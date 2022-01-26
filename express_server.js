@@ -25,6 +25,13 @@ const users = {
   },
 };
 
+const findUser = (email) => {
+  const foundUser = Object.keys(users).find(
+    (user) => users[user].email === email
+  );
+  return users[foundUser];
+};
+
 function generateRandomString() {
   const rndString = Math.random().toString(36).slice(2, 8);
   return rndString;
@@ -90,8 +97,17 @@ app.get("/login", (req, res) => {
 });
 
 app.post("/login", (req, res) => {
-  res.cookie("user_id", users[req.body.username]);
-  res.redirect("/urls");
+  const email = req.body["email"];
+  const password = req.body["password"];
+  const foundUser = findUser(email);
+  if (!foundUser) {
+    res.status(403).send("Email cannot be found");
+  } else if (foundUser.password !== password) {
+    res.status(403).send("Password does not match");
+  } else {
+    res.cookie("user_id", foundUser.id);
+    res.redirect("/urls");
+  }
 });
 
 app.post("/logout", (req, res) => {
@@ -106,16 +122,12 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
-const userEmailExists = (email) => {
-  return Object.keys(users).some((user) => users[user].email === email);
-};
-
 app.post("/register", (req, res) => {
   const email = req.body["email"];
   const password = req.body["password"];
   if (email === "" || password === "") {
     res.status(400).send("Email and Password are required");
-  } else if (userEmailExists(email)) {
+  } else if (findUser(email)) {
     res.status(400).send("Email already exists");
   } else {
     const id = generateRandomString();
