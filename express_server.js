@@ -99,17 +99,27 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+const userEmailExists = (email) => {
+  return Object.keys(users).some((user) => users[user].email === email);
+};
+
 app.post("/register", (req, res) => {
   const email = req.body["email"];
   const password = req.body["password"];
-  const id = generateRandomString();
-  users[id] = {
-    id,
-    email,
-    password,
-  };
-  res.cookie("user_id", id);
-  res.redirect("/urls");
+  if (email === "" || password === "") {
+    res.status(400).send("Email and Password are required");
+  } else if (userEmailExists(email)) {
+    res.status(400).send("Email already exists");
+  } else {
+    const id = generateRandomString();
+    users[id] = {
+      id,
+      email,
+      password,
+    };
+    res.cookie("user_id", id);
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls.json", (req, res) => {
