@@ -82,7 +82,7 @@ app.get("/", (req, res) => {
 app.get("/urls", (req, res) => {
   console.log(users, urlDatabase);
   const templateVars = {
-    urls: urlDatabase,
+    urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]],
   };
   res.render("urls_index", templateVars);
@@ -114,12 +114,20 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  const templateVars = {
-    shortURL: req.params.shortURL,
-    longURL: urlDatabase[req.params.shortURL]["longURL"],
-    user: users[req.cookies["user_id"]],
-  };
-  res.render("urls_show", templateVars);
+  if (!users[req.cookies["user_id"]]) {
+    res.redirect("/login");
+  } else if (
+    urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]
+  ) {
+    res.status(400).send("You don't have access to this URL");
+  } else {
+    const templateVars = {
+      shortURL: req.params.shortURL,
+      longURL: urlDatabase[req.params.shortURL]["longURL"],
+      user: users[req.cookies["user_id"]],
+    };
+    res.render("urls_show", templateVars);
+  }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
