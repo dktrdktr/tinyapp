@@ -1,8 +1,8 @@
-const findUser = (email, database) => {
+const findUserByEmail = (email, database) => {
   const foundUser = Object.keys(database).find(
     (user) => database[user].email === email
   );
   return database[foundUser];
 };
 
-module.exports = { findUser };
+module.exports = { findUserByEmail };

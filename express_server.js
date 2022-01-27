@@ -10,7 +10,7 @@ app.use(morgan("tiny"));
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 
-const { findUser } = require("./helpers");
+const { findUserByEmail } = require("./helpers");
 const PORT = 8080; // default port 8080
 
 app.use(
@@ -92,7 +92,7 @@ const addNewUser = (email, password) => {
 };
 
 const authenticateUser = (email, password) => {
-  const user = findUser(email, users);
+  const user = findUserByEmail(email, users);
 
   console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
 
@@ -247,7 +247,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body["email"];
   const password = req.body["password"];
-  const user = findUser(email, users);
+  const user = findUserByEmail(email, users);
   if (email === "" || password === "") {
     res.status(400).send("Email and Password are required");
   } else if (!user) {
