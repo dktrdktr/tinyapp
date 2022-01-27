@@ -14,14 +14,16 @@ function generateRandomString() {
 }
 
 const urlsForUser = (id, urlDb) => {
-  const urlKeys = Object.keys(urlDb).filter((url) => {
+  // Find the keys of the urls that belong to the user
+  const userUrlKeys = Object.keys(urlDb).filter((url) => {
     return urlDb[url].userID === id;
   });
-  const filteredUrls = {};
-  for (let key of urlKeys) {
-    filteredUrls[key] = urlDb[key];
+  // Create a new object with the urls of the user
+  const userUrls = {};
+  for (let key of userUrlKeys) {
+    userUrls[key] = urlDb[key];
   }
-  return filteredUrls;
+  return userUrls;
 };
 
 const addNewUser = (email, password, userDb) => {

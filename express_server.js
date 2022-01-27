@@ -14,7 +14,6 @@ const {
 const { urlDatabase, users } = require("./data");
 
 app.use(bodyParser.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
 app.use(morgan("tiny"));
 app.use(
   cookieSession({
@@ -25,8 +24,10 @@ app.use(
     ],
   })
 );
+app.set("view engine", "ejs");
 
 app.get("/", (req, res) => {
+  // Redirect to the login page if the visitor is not logged in
   if (!users[req.session["user_id"]]) {
     res.redirect("/login");
   } else {
@@ -35,64 +36,66 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  const userId = req.session["user_id"];
   const templateVars = {
-    urls: urlsForUser(req.session["user_id"], urlDatabase),
-    user: users[req.session["user_id"]],
+    urls: urlsForUser(userId, urlDatabase),
+    user: users[userId],
   };
   res.render("urls_index", templateVars);
 });
 
 app.post("/urls", (req, res) => {
-  if (!users[req.session["user_id"]]) {
+  const userId = req.session["user_id"];
+  if (!users[userId]) {
     res.status(400).send("Only a logged in user can do this");
   } else {
     const rndShortUrl = generateRandomString();
     urlDatabase[rndShortUrl] = {
       longURL: req.body["longURL"],
-      userID: req.session["user_id"],
+      userID: userId,
     };
     res.redirect(`/urls/${rndShortUrl}`);
   }
 });
 
 app.get("/urls/new", (req, res) => {
-  if (!users[req.session["user_id"]]) {
+  const userId = req.session["user_id"];
+  if (!users[userId]) {
     res.redirect("/login");
   } else {
     const templateVars = {
-      user: users[req.session["user_id"]],
+      user: users[userId],
     };
     res.render("urls_new", templateVars);
   }
 });
 
 app.get("/urls/:shortURL", (req, res) => {
+  const userId = req.session["user_id"];
+  // 404 if shortURL does not exist
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     res.redirect("/404");
-  } else if (!users[req.session["user_id"]]) {
+  } else if (!users[userId]) {
     res.status(403).send("Please login first");
-  } else if (
-    urlDatabase[req.params.shortURL].userID !== req.session["user_id"]
-  ) {
+  } else if (urlDatabase[req.params.shortURL].userID !== userId) {
     res.status(403).send("You don't have access to this URL");
   } else {
     const templateVars = {
       shortURL: req.params.shortURL,
       longURL: urlDatabase[req.params.shortURL]["longURL"],
-      user: users[req.session["user_id"]],
+      user: users[userId],
     };
     res.render("urls_show", templateVars);
   }
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
+  const userId = req.session["user_id"];
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     res.redirect("/404");
-  } else if (!users[req.session["user_id"]]) {
+  } else if (!users[userId]) {
     res.status(403).send("Please login first");
-  } else if (
-    urlDatabase[req.params.shortURL].userID !== req.session["user_id"]
-  ) {
+  } else if (urlDatabase[req.params.shortURL].userID !== userId) {
     res.status(403).send("You don't have access to this URL");
   } else {
     delete urlDatabase[req.params.shortURL];
@@ -101,13 +104,12 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 app.post("/urls/:shortURL/", (req, res) => {
+  const userId = req.session["user_id"];
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     res.redirect("/404");
-  } else if (!users[req.session["user_id"]]) {
+  } else if (!users[userId]) {
     res.status(403).send("Please login first");
-  } else if (
-    urlDatabase[req.params.shortURL].userID !== req.session["user_id"]
-  ) {
+  } else if (urlDatabase[req.params.shortURL].userID !== userId) {
     res.status(403).send("You don't have access to this URL");
   } else {
     urlDatabase[req.params.shortURL] = {
@@ -134,11 +136,12 @@ app.get("/404", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  if (users[req.session["user_id"]]) {
+  const userId = req.session["user_id"];
+  if (users[userId]) {
     res.redirect("/urls");
   } else {
     const templateVars = {
-      user: users[req.session["user_id"]],
+      user: users[userIduserId],
     };
     res.render("login", templateVars);
   }
@@ -165,11 +168,12 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  if (users[req.session["user_id"]]) {
+  const userId = req.session["user_id"];
+  if (users[userId]) {
     res.redirect("/urls");
   } else {
     const templateVars = {
-      user: users[req.session["user_id"]],
+      user: users[userId],
     };
     res.render("register", templateVars);
   }
