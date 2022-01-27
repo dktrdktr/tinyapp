@@ -94,8 +94,6 @@ const addNewUser = (email, password) => {
 const authenticateUser = (email, password) => {
   const user = findUserByEmail(email, users);
 
-  console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
-
   // if we got a user back and the passwords match then return the userObj
   if (user && bcrypt.compareSync(password, user.password)) {
     // user is authenticated
@@ -106,11 +104,14 @@ const authenticateUser = (email, password) => {
 };
 
 app.get("/", (req, res) => {
-  res.send("Hello!");
+  if (!users[req.session["user_id"]]) {
+    res.redirect("/login");
+  } else {
+    res.redirect("/urls");
+  }
 });
 
 app.get("/urls", (req, res) => {
-  console.log(urlDatabase, users);
   const templateVars = {
     urls: urlsForUser(req.session["user_id"]),
     user: users[req.session["user_id"]],
@@ -127,7 +128,6 @@ app.post("/urls", (req, res) => {
       longURL: req.body["longURL"],
       userID: req.session["user_id"],
     };
-    console.log("created new entry in urlDatabase", urlDatabase);
     res.redirect(`/urls/${rndShortUrl}`);
   }
 });
@@ -211,10 +211,14 @@ app.get("/404", (req, res) => {
 });
 
 app.get("/login", (req, res) => {
-  const templateVars = {
-    user: users[req.session["user_id"]],
-  };
-  res.render("login", templateVars);
+  if (users[req.session["user_id"]]) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = {
+      user: users[req.session["user_id"]],
+    };
+    res.render("login", templateVars);
+  }
 });
 
 app.post("/login", (req, res) => {
@@ -238,10 +242,14 @@ app.post("/logout", (req, res) => {
 });
 
 app.get("/register", (req, res) => {
-  const templateVars = {
-    user: users[req.session["user_id"]],
-  };
-  res.render("register", templateVars);
+  if (users[req.session["user_id"]]) {
+    res.redirect("/urls");
+  } else {
+    const templateVars = {
+      user: users[req.session["user_id"]],
+    };
+    res.render("register", templateVars);
+  }
 });
 
 app.post("/register", (req, res) => {
