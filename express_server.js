@@ -10,6 +10,7 @@ app.use(morgan("tiny"));
 const bcrypt = require("bcryptjs");
 const salt = bcrypt.genSaltSync(10);
 
+const { findUser } = require("./helpers");
 const PORT = 8080; // default port 8080
 
 app.use(
@@ -64,13 +65,6 @@ function generateRandomString() {
   const rndString = Math.random().toString(36).slice(2, 8);
   return rndString;
 }
-
-const findUser = (email, database) => {
-  const foundUser = Object.keys(database).find(
-    (user) => database[user].email === email
-  );
-  return database[foundUser];
-};
 
 const urlsForUser = (id) => {
   const urlKeys = Object.keys(urlDatabase).filter((url) => {
