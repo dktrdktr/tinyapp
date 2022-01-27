@@ -1,18 +1,21 @@
 const express = require("express");
 const app = express();
 const bodyParser = require("body-parser");
-app.use(bodyParser.urlencoded({ extended: true }));
-app.set("view engine", "ejs");
-// const cookieParser = require("cookie-parser");
 const cookieSession = require("cookie-session");
 const morgan = require("morgan");
-app.use(morgan("tiny"));
-const bcrypt = require("bcryptjs");
-const salt = bcrypt.genSaltSync(10);
-
-const { findUserByEmail } = require("./helpers");
 const PORT = 8080; // default port 8080
+const {
+  findUserByEmail,
+  generateRandomString,
+  urlsForUser,
+  addNewUser,
+  authenticateUser,
+} = require("./helpers");
+const { urlDatabase, users } = require("./data");
 
+app.use(bodyParser.urlencoded({ extended: true }));
+app.set("view engine", "ejs");
+app.use(morgan("tiny"));
 app.use(
   cookieSession({
     name: "session",
@@ -22,86 +25,6 @@ app.use(
     ],
   })
 );
-
-const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
-  abc123: {
-    longURL: "https://www.metro.ca",
-    userID: "user2RandomID",
-  },
-};
-
-const users = {
-  testUser: {
-    id: "testUser",
-    email: "test@test.lt",
-    password: bcrypt.hashSync("test", salt),
-  },
-  userRandomID: {
-    id: "userRandomID",
-    email: "user@example.com",
-    password: bcrypt.hashSync("purple-monkey-dinosaur", salt),
-  },
-  user2RandomID: {
-    id: "user2RandomID",
-    email: "user2@example.com",
-    password: bcrypt.hashSync("dishwasher-funk", salt),
-  },
-  aJ48lW: {
-    id: "aJ48lW",
-    email: "user3@example.com",
-    password: bcrypt.hashSync("test", salt),
-  },
-};
-
-function generateRandomString() {
-  const rndString = Math.random().toString(36).slice(2, 8);
-  return rndString;
-}
-
-const urlsForUser = (id) => {
-  const urlKeys = Object.keys(urlDatabase).filter((url) => {
-    return urlDatabase[url].userID === id;
-  });
-  const filteredUrls = {};
-  for (let key of urlKeys) {
-    filteredUrls[key] = urlDatabase[key];
-  }
-  return filteredUrls;
-};
-
-const addNewUser = (email, password) => {
-  const id = generateRandomString();
-
-  const newUserObj = {
-    id,
-    email,
-    password: bcrypt.hashSync(password, salt),
-  };
-
-  users[id] = newUserObj;
-
-  return id;
-};
-
-const authenticateUser = (email, password) => {
-  const user = findUserByEmail(email, users);
-
-  // if we got a user back and the passwords match then return the userObj
-  if (user && bcrypt.compareSync(password, user.password)) {
-    // user is authenticated
-    return user;
-  } else {
-    return false;
-  }
-};
 
 app.get("/", (req, res) => {
   if (!users[req.session["user_id"]]) {
@@ -113,7 +36,7 @@ app.get("/", (req, res) => {
 
 app.get("/urls", (req, res) => {
   const templateVars = {
-    urls: urlsForUser(req.session["user_id"]),
+    urls: urlsForUser(req.session["user_id"], urlDatabase),
     user: users[req.session["user_id"]],
   };
   res.render("urls_index", templateVars);
@@ -226,7 +149,7 @@ app.post("/login", (req, res) => {
   const password = req.body["password"];
 
   // Authenticate the user
-  const user = authenticateUser(email, password);
+  const user = authenticateUser(email, password, users);
 
   if (user) {
     req.session["user_id"] = user.id;
@@ -259,7 +182,7 @@ app.post("/register", (req, res) => {
   if (email === "" || password === "") {
     res.status(400).send("Email and Password are required");
   } else if (!user) {
-    const userId = addNewUser(email, password);
+    const userId = addNewUser(email, password, users);
     req.session["user_id"] = userId;
     res.redirect("/urls");
   } else {
