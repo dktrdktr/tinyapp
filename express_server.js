@@ -23,6 +23,10 @@ const urlDatabase = {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
   },
+  abc123: {
+    longURL: "https://www.metro.ca",
+    userID: "user2RandomID",
+  },
 };
 
 const users = {
@@ -41,6 +45,11 @@ const users = {
     email: "user2@example.com",
     password: "dishwasher-funk",
   },
+  aJ48lW: {
+    id: "aJ48lW",
+    email: "user3@example.com",
+    password: "test",
+  },
 };
 
 const findUser = (email) => {
@@ -48,6 +57,17 @@ const findUser = (email) => {
     (user) => users[user].email === email
   );
   return users[foundUser];
+};
+
+const urlsForUser = (id) => {
+  const urlKeys = Object.keys(urlDatabase).filter((url) => {
+    return urlDatabase[url].userID === id;
+  });
+  const filteredUrls = {};
+  for (let key of urlKeys) {
+    filteredUrls[key] = urlDatabase[key];
+  }
+  return filteredUrls;
 };
 
 function generateRandomString() {
