@@ -65,11 +65,11 @@ function generateRandomString() {
   return rndString;
 }
 
-const findUser = (email) => {
-  const foundUser = Object.keys(users).find(
-    (user) => users[user].email === email
+const findUser = (email, database) => {
+  const foundUser = Object.keys(database).find(
+    (user) => database[user].email === email
   );
-  return users[foundUser];
+  return database[foundUser];
 };
 
 const urlsForUser = (id) => {
@@ -98,7 +98,7 @@ const addNewUser = (email, password) => {
 };
 
 const authenticateUser = (email, password) => {
-  const user = findUser(email);
+  const user = findUser(email, users);
 
   console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
 
@@ -253,7 +253,7 @@ app.get("/register", (req, res) => {
 app.post("/register", (req, res) => {
   const email = req.body["email"];
   const password = req.body["password"];
-  const user = findUser(email);
+  const user = findUser(email, users);
   if (email === "" || password === "") {
     res.status(400).send("Email and Password are required");
   } else if (!user) {
