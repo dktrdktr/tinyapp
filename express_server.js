@@ -7,6 +7,7 @@ app.set("view engine", "ejs");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 const morgan = require("morgan");
+const e = require("express");
 app.use(morgan("tiny"));
 
 // const urlDatabase = {
@@ -80,7 +81,6 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  console.log(users, urlDatabase);
   const templateVars = {
     urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]],
@@ -114,12 +114,14 @@ app.get("/urls/new", (req, res) => {
 });
 
 app.get("/urls/:shortURL", (req, res) => {
-  if (!users[req.cookies["user_id"]]) {
-    res.redirect("/login");
+  if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    res.redirect("/404");
+  } else if (!users[req.cookies["user_id"]]) {
+    res.status(403).send("Please login first");
   } else if (
     urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]
   ) {
-    res.status(400).send("You don't have access to this URL");
+    res.status(403).send("You don't have access to this URL");
   } else {
     const templateVars = {
       shortURL: req.params.shortURL,
@@ -131,16 +133,36 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 app.post("/urls/:shortURL/delete", (req, res) => {
-  delete urlDatabase[req.params.shortURL];
-  res.redirect("/urls");
+  if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    res.redirect("/404");
+  } else if (!users[req.cookies["user_id"]]) {
+    res.status(403).send("Please login first");
+  } else if (
+    urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]
+  ) {
+    res.status(403).send("You don't have access to this URL");
+  } else {
+    delete urlDatabase[req.params.shortURL];
+    res.redirect("/urls");
+  }
 });
 
 app.post("/urls/:shortURL/", (req, res) => {
-  urlDatabase[req.params.shortURL] = {
-    ...urlDatabase[req.params.shortURL],
-    longURL: req.body.newURL,
-  };
-  res.redirect("/urls");
+  if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    res.redirect("/404");
+  } else if (!users[req.cookies["user_id"]]) {
+    res.status(403).send("Please login first");
+  } else if (
+    urlDatabase[req.params.shortURL].userID !== req.cookies["user_id"]
+  ) {
+    res.status(403).send("You don't have access to this URL");
+  } else {
+    urlDatabase[req.params.shortURL] = {
+      ...urlDatabase[req.params.shortURL],
+      longURL: req.body.newURL,
+    };
+    res.redirect("/urls");
+  }
 });
 
 app.get("/u/:shortURL", (req, res) => {
