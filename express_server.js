@@ -7,8 +7,9 @@ app.set("view engine", "ejs");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
 const morgan = require("morgan");
-const e = require("express");
 app.use(morgan("tiny"));
+const bcrypt = require("bcryptjs");
+const salt = bcrypt.genSaltSync(10);
 
 // const urlDatabase = {
 //   b2xVn2: "http://www.lighthouselabs.ca",
@@ -34,22 +35,22 @@ const users = {
   testUser: {
     id: "testUser",
     email: "test@test.lt",
-    password: "test",
+    password: bcrypt.hashSync("test", salt),
   },
   userRandomID: {
     id: "userRandomID",
     email: "user@example.com",
-    password: "purple-monkey-dinosaur",
+    password: bcrypt.hashSync("purple-monkey-dinosaur", salt),
   },
   user2RandomID: {
     id: "user2RandomID",
     email: "user2@example.com",
-    password: "dishwasher-funk",
+    password: bcrypt.hashSync("dishwasher-funk", salt),
   },
   aJ48lW: {
     id: "aJ48lW",
     email: "user3@example.com",
-    password: "test",
+    password: bcrypt.hashSync("test", salt),
   },
 };
 
@@ -81,6 +82,7 @@ app.get("/", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
+  console.log(urlDatabase, users);
   const templateVars = {
     urls: urlsForUser(req.cookies["user_id"]),
     user: users[req.cookies["user_id"]],
@@ -213,22 +215,35 @@ app.get("/register", (req, res) => {
   res.render("register", templateVars);
 });
 
+const addNewUser = (email, password) => {
+  // Generate a random id
+  const id = generateRandomString();
+
+  const newUserObj = {
+    id,
+    email,
+    password: bcrypt.hashSync(password, salt),
+  };
+
+  // Add the user Object into the usersDb
+  users[id] = newUserObj;
+
+  // return the id of the user
+  return id;
+};
+
 app.post("/register", (req, res) => {
   const email = req.body["email"];
   const password = req.body["password"];
+  const user = findUser(email);
   if (email === "" || password === "") {
     res.status(400).send("Email and Password are required");
-  } else if (findUser(email)) {
-    res.status(400).send("Email already exists");
-  } else {
-    const id = generateRandomString();
-    users[id] = {
-      id,
-      email,
-      password,
-    };
-    res.cookie("user_id", id);
+  } else if (!user) {
+    const userId = addNewUser(email, password);
+    res.cookie("user_id", userId);
     res.redirect("/urls");
+  } else {
+    res.status(400).send("Email already exists");
   }
 });
 
