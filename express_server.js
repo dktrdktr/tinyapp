@@ -141,7 +141,7 @@ app.get("/login", (req, res) => {
     res.redirect("/urls");
   } else {
     const templateVars = {
-      user: users[userIduserId],
+      user: users[userId],
     };
     res.render("login", templateVars);
   }
