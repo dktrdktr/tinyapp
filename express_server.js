@@ -54,6 +54,11 @@ const users = {
   },
 };
 
+function generateRandomString() {
+  const rndString = Math.random().toString(36).slice(2, 8);
+  return rndString;
+}
+
 const findUser = (email) => {
   const foundUser = Object.keys(users).find(
     (user) => users[user].email === email
@@ -72,10 +77,38 @@ const urlsForUser = (id) => {
   return filteredUrls;
 };
 
-function generateRandomString() {
-  const rndString = Math.random().toString(36).slice(2, 8);
-  return rndString;
-}
+const addNewUser = (email, password) => {
+  // Generate a random id
+  const id = generateRandomString();
+
+  const newUserObj = {
+    id,
+    email,
+    password: bcrypt.hashSync(password, salt),
+  };
+
+  // Add the user Object into the usersDb
+  users[id] = newUserObj;
+
+  // return the id of the user
+  return id;
+};
+
+const authenticateUser = (email, password) => {
+  // retrieve the user with that email
+  const user = findUser(email);
+
+  console.log("FORM PASSWORD:", password, "DB PASSWORD:", user.password);
+
+  // if we got a user back and the passwords match then return the userObj
+  if (user && bcrypt.compareSync(password, user.password)) {
+    // user is authenticated
+    return user;
+  } else {
+    // Otherwise return false
+    return false;
+  }
+};
 
 app.get("/", (req, res) => {
   res.send("Hello!");
@@ -192,14 +225,15 @@ app.get("/login", (req, res) => {
 app.post("/login", (req, res) => {
   const email = req.body["email"];
   const password = req.body["password"];
-  const foundUser = findUser(email);
-  if (!foundUser) {
-    res.status(403).send("Email cannot be found");
-  } else if (foundUser.password !== password) {
-    res.status(403).send("Password does not match");
-  } else {
-    res.cookie("user_id", foundUser.id);
+
+  // Authenticate the user
+  const user = authenticateUser(email, password);
+
+  if (user) {
+    res.cookie("user_id", user.id);
     res.redirect("/urls");
+  } else {
+    res.status(401).send("Wrong credentials");
   }
 });
 
@@ -214,23 +248,6 @@ app.get("/register", (req, res) => {
   };
   res.render("register", templateVars);
 });
-
-const addNewUser = (email, password) => {
-  // Generate a random id
-  const id = generateRandomString();
-
-  const newUserObj = {
-    id,
-    email,
-    password: bcrypt.hashSync(password, salt),
-  };
-
-  // Add the user Object into the usersDb
-  users[id] = newUserObj;
-
-  // return the id of the user
-  return id;
-};
 
 app.post("/register", (req, res) => {
   const email = req.body["email"];
