@@ -6,6 +6,8 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.set("view engine", "ejs");
 const cookieParser = require("cookie-parser");
 app.use(cookieParser());
+const morgan = require("morgan");
+app.use(morgan("tiny"));
 
 // const urlDatabase = {
 //   b2xVn2: "http://www.lighthouselabs.ca",
@@ -115,7 +117,7 @@ app.post("/urls/:shortURL/", (req, res) => {
 
 app.get("/u/:shortURL", (req, res) => {
   if (Object.keys(urlDatabase).includes(req.params.shortURL)) {
-    res.redirect(urlDatabase[req.params.shortURL]);
+    res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
     res.redirect("/404");
   }
