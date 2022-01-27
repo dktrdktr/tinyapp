@@ -9,6 +9,9 @@
       <p>Please log in or register first</p>
       <% } else if (Object.keys(urls).length === 0) { %>
       <p>There's no URLs to show</p>
+      <form method="GET" action="/urls/new">
+        <button class="btn btn-primary">Create a new short link</button>
+      </form>
       <% } else { %>
       <table class="table">
         <thead>
@@ -51,10 +54,10 @@
           <% } %>
         </tbody>
       </table>
-      <% } %>
       <form method="GET" action="/urls/new">
         <button class="btn btn-primary">Create a new short link</button>
       </form>
+      <% } %>
     </main>
     <!-- Bootstrap JS -->
     <script
