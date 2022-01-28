@@ -13,7 +13,6 @@ const {
   authenticateUser,
 } = require("./helpers");
 const { urlDatabase, users } = require("./data");
-const { urlVisits } = require("./analytics");
 
 app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
