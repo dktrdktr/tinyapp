@@ -5,14 +5,17 @@ const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
     userID: "aJ48lW",
+    visits: 0,
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
+    visits: 0,
   },
   abc123: {
     longURL: "https://www.metro.ca",
     userID: "user2RandomID",
+    visits: 0,
   },
 };
 

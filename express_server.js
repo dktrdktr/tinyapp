@@ -13,6 +13,7 @@ const {
   authenticateUser,
 } = require("./helpers");
 const { urlDatabase, users } = require("./data");
+const { urlVisits } = require("./analytics");
 
 app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -39,6 +40,7 @@ app.get("/", (req, res) => {
 
 // Gets URLS that belong to the user
 app.get("/urls", (req, res) => {
+  console.log(urlDatabase);
   const userId = req.session["user_id"];
   const templateVars = {
     urls: urlsForUser(userId, urlDatabase), // returns a new object with the urls that belong to the user
@@ -93,6 +95,7 @@ app.get("/urls/:shortURL", (req, res) => {
     shortURL: req.params.shortURL,
     longURL: urlDatabase[req.params.shortURL]["longURL"],
     user: users[userId],
+    visits: urlDatabase[req.params.shortURL].visits,
   };
   res.render("urls_show", templateVars);
 });
@@ -132,9 +135,19 @@ app.put("/urls/:shortURL/", (req, res) => {
   res.redirect("/urls");
 });
 
+const countVisits = (urlDb, shortUrl) => {
+  const targetUrl = urlDb[shortUrl];
+  if (Object.keys(targetUrl).includes("visits")) {
+    targetUrl.visits++;
+    return;
+  }
+  targetUrl.visits = 1;
+};
 // Redirects using the shortURL to the outbound longURL
 app.get("/u/:shortURL", (req, res) => {
   if (Object.keys(urlDatabase).includes(req.params.shortURL)) {
+    // analytics helper, counts visits, only has side-effects, no return
+    countVisits(urlDatabase, req.params.shortURL);
     res.redirect(urlDatabase[req.params.shortURL].longURL);
   } else {
     res.redirect("/404");
