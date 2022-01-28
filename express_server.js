@@ -1,4 +1,5 @@
 const express = require("express");
+const methodOverride = require("method-override");
 const app = express();
 const bodyParser = require("body-parser");
 const cookieSession = require("cookie-session");
@@ -13,6 +14,7 @@ const {
 } = require("./helpers");
 const { urlDatabase, users } = require("./data");
 
+app.use(methodOverride("_method"));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(morgan("tiny"));
 app.use(
@@ -96,7 +98,7 @@ app.get("/urls/:shortURL", (req, res) => {
 });
 
 // Deletes an individual url
-app.post("/urls/:shortURL/delete", (req, res) => {
+app.delete("/urls/:shortURL/", (req, res) => {
   const userId = req.session["user_id"];
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     return res.redirect("/404");
@@ -112,7 +114,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 // Updates an individual url
-app.post("/urls/:shortURL/", (req, res) => {
+app.put("/urls/:shortURL/", (req, res) => {
   const userId = req.session["user_id"];
   if (!Object.keys(urlDatabase).includes(req.params.shortURL)) {
     return res.redirect("/404");
