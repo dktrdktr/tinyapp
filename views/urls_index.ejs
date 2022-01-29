@@ -44,11 +44,13 @@
               >
             </td>
             <td>
-              <a href="<%= `/urls/${url}/` %>"><button>Edit</button></a>
+              <a href="<%= `/urls/${url}/` %>"
+                ><button class="btn btn-primary">Edit</button></a
+              >
             </td>
             <td>
               <form method="POST" action="<%= `/urls/${url}?_method=DELETE` %>">
-                <button>Delete</button>
+                <button class="btn btn-primary">Delete</button>
               </form>
             </td>
             <td>
