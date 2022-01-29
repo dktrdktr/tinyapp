@@ -20,7 +20,26 @@
         </form>
         <br />
         <h3>Analytics</h3>
-        <p>Visits: <%= visits ? visits : 0 %></p>
+        <p>Total Visits: <%= analytics.totalVisits %></p>
+        <p>Unique Visitors <%= analytics.uniqueVisitors %></p>
+        <table class="table mx-auto">
+          <thead>
+            <tr>
+              <th>Visit date</th>
+              <th>Visitor ID</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% for (let stamp of analytics.visitStamp) { %>
+            <tr>
+              <td>
+                <%= new Date(stamp.timestamp).toLocaleDateString("en-CA") %>
+              </td>
+              <td><%= stamp.visitor_id %></td>
+            </tr>
+            <% } %>
+          </tbody>
+        </table>
       </div>
       <div class="card-footer text-muted"></div>
     </div>

@@ -5,17 +5,32 @@ const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
     userID: "aJ48lW",
-    visits: 0,
+    createdAt: "2015-03-25T12:00:00.000Z", // look into that
+    analytics: {
+      totalVisits: 0,
+      uniqueVisitors: 0,
+      visitStamp: [],
+    },
   },
   i3BoGr: {
     longURL: "https://www.google.ca",
     userID: "aJ48lW",
-    visits: 0,
+    createdAt: "2015-03-25T12:00:00.000Z", // look into that
+    analytics: {
+      totalVisits: 0,
+      uniqueVisitors: 0,
+      visitStamp: [],
+    },
   },
   abc123: {
     longURL: "https://www.metro.ca",
     userID: "user2RandomID",
-    visits: 0,
+    createdAt: "2015-03-25T12:00:00.000Z", // look into that
+    analytics: {
+      totalVisits: 0,
+      uniqueVisitors: 0,
+      visitStamp: [],
+    },
   },
 };
 

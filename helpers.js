@@ -55,10 +55,29 @@ const authenticateUser = (email, password, userDb) => {
   }
 };
 
+// Updates analytics data with total visit, unique visitor and timestamp metrics
+const updateAnalytics = (urlDb, shortUrl, visitorId) => {
+  const { analytics } = urlDb[shortUrl];
+  analytics.totalVisits++;
+  const visitStamp = {
+    timestamp: new Date().toISOString(),
+    visitor_id: visitorId,
+  };
+  const isUnique = analytics.visitStamp.every(
+    (elem) => elem.visitor_id !== visitorId
+  );
+  if (isUnique) {
+    analytics.uniqueVisitors++;
+  }
+  analytics.visitStamp = [...analytics.visitStamp, visitStamp];
+  return;
+};
+
 module.exports = {
   findUserByEmail,
   generateRandomString,
   urlsForUser,
   addNewUser,
   authenticateUser,
+  updateAnalytics,
 };
